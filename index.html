@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Map Distance Calculator - Sergio</title>
+  <title>Map Distance Calculator</title>
   
   <!-- Leaflet CSS -->
   <link
@@ -21,24 +21,47 @@
     <h1>Map Distance Calculator</h1>
   </header>
 
-  <div id="controls">
-    <div class="location-input">
-      <label for="primary-location">Primary Location:</label>
-      <input type="text" id="primary-location" placeholder="Enter primary location" autocomplete="off">
-      <div class="suggestions" id="primary-suggestions"></div>
-      <button id="set-primary">Set Primary Location</button>
-    </div>
+  <div class="container">
+    <!-- Presets Sidebar -->
+    <aside id="presets">
+      <h2>Presets</h2>
+      <ul>
+        <li><button class="preset-btn" data-address="Zur Luftbrücke 1, 31515 Wunstorf, Germany">1. Zur Luftbrücke 1, 31515 Wunstorf, Germany</button></li>
+        <li><button class="preset-btn" data-address="10, Sedanstraße, Weststadt, Ulm, Baden-Württemberg, 89077, Germany">2. 10, Sedanstraße, Weststadt, Ulm, Baden-Württemberg, 89077, Germany</button></li>
+        <li><button class="preset-btn" data-address="Claude-Dornier-Straße, 88090 Immenstaad am Bodensee, Germany">3. Claude-Dornier-Straße, 88090 Immenstaad am Bodensee, Germany</button></li>
+        <li><button class="preset-btn" data-address="Willy-Messerschmitt-Straße 1, 82024 Taufkirchen, Germany">4. Willy-Messerschmitt-Straße 1, 82024 Taufkirchen, Germany</button></li>
+        <li><button class="preset-btn" data-address="Gunnels Wood Rd, Stevenage SG1 2AS">5. Gunnels Wood Rd, Stevenage SG1 2AS</button></li>
+        <li><button class="preset-btn" data-address="Av. Maestranza Aérea, 41011 Sevilla, Spain">6. Av. Maestranza Aérea, 41011 Sevilla, Spain</button></li>
+        <li><button class="preset-btn" data-address="Anchorage Road, Portsmouth PO3 5PU">7. Anchorage Road, Portsmouth PO3 5PU</button></li>
+        <li><button class="preset-btn" data-address="Rechliner Str., 85077 Manching, Germany">8. Rechliner Str., 85077 Manching, Germany</button></li>
+        <li><button class="preset-btn" data-address="Quadrant House, Celtic Springs Business Park, Duffryn, Newport NP10 8FZ">9. Quadrant House, Celtic Springs Business Park, Duffryn, Newport NP10 8FZ</button></li>
+        <li><button class="preset-btn" data-address="Partnership House, Regent Farm Rd, Newcastle upon Tyne NE3 3AF">10. Partnership House, Regent Farm Rd, Newcastle upon Tyne NE3 3AF</button></li>
+        <li><button class="preset-btn" data-address="ZA Clef de Saint Pierre, 1 Bd Jean Moulin, 78990 Élancourt, France">11. ZA Clef de Saint Pierre, 1 Bd Jean Moulin, 78990 Élancourt, France</button></li>
+      </ul>
+    </aside>
 
-    <div class="location-input" id="comparison-locations-section">
-      <h3>Comparison Locations:</h3>
-      <input type="text" id="comparison-input" placeholder="Enter comparison location" autocomplete="off">
-      <div class="suggestions" id="comparison-suggestions"></div>
-      <button id="add-comparison">Add Location</button>
-      <ul id="comparison-list"></ul>
-    </div>
+    <!-- Main Content -->
+    <main>
+      <div id="controls">
+        <div class="location-input">
+          <label for="primary-location">Primary Location:</label>
+          <input type="text" id="primary-location" placeholder="Enter primary location" autocomplete="off">
+          <div class="suggestions" id="primary-suggestions"></div>
+          <button id="set-primary">Set Primary Location</button>
+        </div>
+
+        <div class="location-input" id="comparison-locations-section">
+          <h3>Comparison Locations:</h3>
+          <input type="text" id="comparison-input" placeholder="Enter comparison location" autocomplete="off">
+          <div class="suggestions" id="comparison-suggestions"></div>
+          <button id="add-comparison">Add Location</button>
+          <ul id="comparison-list"></ul>
+        </div>
+      </div>
+
+      <div id="map"></div>
+    </main>
   </div>
-
-  <div id="map"></div>
 
   <!-- Leaflet JS -->
   <script
