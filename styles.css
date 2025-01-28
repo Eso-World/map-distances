@@ -24,6 +24,58 @@ header h1 {
   font-size: 2em;
 }
 
+/* Container Layout */
+.container {
+  display: flex;
+  flex-direction: row;
+  min-height: calc(100vh - 80px); /* Adjust based on header height */
+}
+
+/* Presets Sidebar */
+aside#presets {
+  width: 250px;
+  background-color: #fff;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+}
+
+aside#presets h2 {
+  margin-bottom: 15px;
+  font-size: 1.2em;
+  color: #4CAF50;
+}
+
+aside#presets ul {
+  list-style-type: none;
+}
+
+aside#presets li {
+  margin-bottom: 10px;
+}
+
+aside#presets button.preset-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #e0f7fa;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.3s ease;
+}
+
+aside#presets button.preset-btn:hover {
+  background-color: #b2ebf2;
+}
+
+/* Main Content */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Controls Section */
 #controls {
   padding: 20px;
@@ -32,13 +84,9 @@ header h1 {
   flex-direction: column;
   gap: 30px;
   max-width: 800px;
-  margin: 20px auto;
+  margin: 20px auto 0 auto;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.location-input {
-  position: relative;
 }
 
 .location-input label {
@@ -146,10 +194,10 @@ button:hover {
 
 /* Map Styling */
 #map {
-  height: 500px;
-  width: 100%;
-  max-width: 1200px;
+  flex: 1;
   margin: 20px auto;
+  max-width: 1200px;
+  height: 600px;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
