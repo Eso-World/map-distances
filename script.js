@@ -176,6 +176,18 @@ document.getElementById('set-primary').addEventListener('click', () => {
   setPrimaryLocation(location);
 });
 
+// Event Listener for Preset Dropdown Button
+document.getElementById('set-preset').addEventListener('click', () => {
+  const presetDropdown = document.getElementById('presets-dropdown');
+  const selectedPreset = presetDropdown.value;
+  if (selectedPreset) {
+    setPrimaryLocation(selectedPreset);
+    presetDropdown.selectedIndex = 0; // Reset dropdown to default
+  } else {
+    alert('Please select a preset location.');
+  }
+});
+
 // Event Listener for Add Comparison Location Button
 document.getElementById('add-comparison').addEventListener('click', async () => {
   const location = document.getElementById('comparison-input').value.trim();
@@ -270,15 +282,6 @@ function updateDistances() {
     ]);
   });
 }
-
-// Event Listener for Preset Buttons
-const presetButtons = document.querySelectorAll('.preset-btn');
-presetButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const address = button.getAttribute('data-address');
-    setPrimaryLocation(address);
-  });
-});
 
 // Close suggestions when clicking outside
 document.addEventListener('click', function(event) {
