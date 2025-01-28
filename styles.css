@@ -27,46 +27,8 @@ header h1 {
 /* Container Layout */
 .container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   min-height: calc(100vh - 80px); /* Adjust based on header height */
-}
-
-/* Presets Sidebar */
-aside#presets {
-  width: 250px;
-  background-color: #fff;
-  padding: 20px;
-  border-right: 1px solid #ddd;
-  overflow-y: auto;
-}
-
-aside#presets h2 {
-  margin-bottom: 15px;
-  font-size: 1.2em;
-  color: #4CAF50;
-}
-
-aside#presets ul {
-  list-style-type: none;
-}
-
-aside#presets li {
-  margin-bottom: 10px;
-}
-
-aside#presets button.preset-btn {
-  width: 100%;
-  padding: 10px;
-  background-color: #e0f7fa;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: left;
-  transition: background-color 0.3s ease;
-}
-
-aside#presets button.preset-btn:hover {
-  background-color: #b2ebf2;
 }
 
 /* Main Content */
@@ -89,13 +51,18 @@ main {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+.location-input {
+  position: relative;
+}
+
 .location-input label {
   display: block;
   margin-bottom: 8px;
   font-weight: bold;
 }
 
-.location-input input[type="text"] {
+.location-input input[type="text"],
+.location-input select {
   width: 100%;
   padding: 10px 15px;
   border: 1px solid #ccc;
@@ -104,7 +71,8 @@ main {
   transition: border-color 0.3s ease;
 }
 
-.location-input input[type="text"]:focus {
+.location-input input[type="text"]:focus,
+.location-input select:focus {
   border-color: #4CAF50;
   outline: none;
 }
@@ -201,4 +169,16 @@ button:hover {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  #controls {
+    max-width: 90%;
+  }
+  
+  #map {
+    max-width: 90%;
+    height: 400px;
+  }
 }
