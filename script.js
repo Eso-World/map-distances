@@ -59,7 +59,7 @@ function renderSuggestions(suggestions, suggestionBox, inputField) {
   });
 }
 
-// Add event listeners for autocomplete
+// Add event listeners for autocomplete with real-time suggestions
 document.getElementById('primary-location').addEventListener('input', debounce(async function() {
   const query = this.value.trim();
   const suggestionBox = document.getElementById('primary-suggestions');
@@ -121,6 +121,29 @@ function calculateDistance(coord1, coord2) {
   return distance.toFixed(2); // in kilometers
 }
 
+// Function to sort comparison locations by distance
+function sortComparisons() {
+  // Create an array of objects containing marker, layer, list item, and distance
+  const comparisons = comparisonMarkers.map((marker, index) => {
+    const coords = marker.getLatLng();
+    const distance = parseFloat(calculateDistance(primaryCoords, { lat: coords.lat, lon: coords.lng }));
+    const listItem = document.querySelectorAll('#comparison-list li')[index];
+    return { marker, layer: comparisonLayers[index], listItem, distance };
+  });
+
+  // Sort the array based on distance
+  comparisons.sort((a, b) => a.distance - b.distance);
+
+  // Clear the existing list
+  const comparisonList = document.getElementById('comparison-list');
+  comparisonList.innerHTML = '';
+
+  // Re-add the list items in sorted order
+  comparisons.forEach(comp => {
+    comparisonList.appendChild(comp.listItem);
+  });
+}
+
 // Set Primary Location
 document.getElementById('set-primary').addEventListener('click', async () => {
   const location = document.getElementById('primary-location').value.trim();
@@ -142,6 +165,9 @@ document.getElementById('set-primary').addEventListener('click', async () => {
 
     // Update distances for existing comparison locations
     updateDistances();
+
+    // Sort comparison locations after updating distances
+    sortComparisons();
   }
 });
 
@@ -163,14 +189,18 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
 
     // Create list item
     const li = document.createElement('li');
-    li.textContent = result.display_name;
+
+    const locationDiv = document.createElement('div');
+    locationDiv.textContent = result.display_name;
 
     const distanceSpan = document.createElement('span');
     distanceSpan.textContent = `Distance: Calculating... km`;
-    li.appendChild(distanceSpan);
 
     const removeBtn = document.createElement('button');
     removeBtn.textContent = 'Remove';
+
+    li.appendChild(locationDiv);
+    li.appendChild(distanceSpan);
     li.appendChild(removeBtn);
 
     document.getElementById('comparison-list').appendChild(li);
@@ -203,6 +233,9 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
       }
     });
 
+    // Sort the comparison list after adding a new location
+    sortComparisons();
+
     // Clear input and suggestions
     document.getElementById('comparison-input').value = '';
     document.getElementById('comparison-suggestions').innerHTML = '';
@@ -213,13 +246,14 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
 
 // Update distances when primary location changes
 function updateDistances() {
-  const listItems = document.querySelectorAll('#comparison-list li');
-  listItems.forEach((li, index) => {
-    const distanceSpan = li.querySelector('span');
-    const marker = comparisonMarkers[index];
+  comparisonMarkers.forEach((marker, index) => {
     const coords = marker.getLatLng();
     const distance = calculateDistance(primaryCoords, { lat: coords.lat, lon: coords.lng });
-    distanceSpan.textContent = `Distance: ${distance} km`;
+    const listItem = document.querySelectorAll('#comparison-list li')[index];
+    if (listItem) {
+      const distanceSpan = listItem.querySelector('span');
+      distanceSpan.textContent = `Distance: ${distance} km`;
+    }
 
     // Update line
     const line = comparisonLayers[index];
