@@ -7,6 +7,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
+// Initialize variables
 let primaryMarker = null;
 let primaryCoords = null;
 const comparisonMarkers = [];
@@ -60,17 +61,6 @@ function renderSuggestions(suggestions, suggestionBox, inputField) {
 }
 
 // Add event listeners for autocomplete with real-time suggestions
-document.getElementById('primary-location').addEventListener('input', debounce(async function() {
-  const query = this.value.trim();
-  const suggestionBox = document.getElementById('primary-suggestions');
-  if (query.length < 3) {
-    suggestionBox.innerHTML = '';
-    return;
-  }
-  const suggestions = await fetchSuggestions(query);
-  renderSuggestions(suggestions, suggestionBox, this);
-}, 300));
-
 document.getElementById('comparison-input').addEventListener('input', debounce(async function() {
   const query = this.value.trim();
   const suggestionBox = document.getElementById('comparison-suggestions');
@@ -147,7 +137,7 @@ function sortComparisons() {
 // Function to set Primary Location
 async function setPrimaryLocation(location) {
   if (!location) {
-    alert('Please enter a primary location.');
+    alert('Please select a preset location.');
     return;
   }
   const result = await geocode(location);
@@ -170,13 +160,7 @@ async function setPrimaryLocation(location) {
   }
 }
 
-// Event Listener for Set Primary Location Button
-document.getElementById('set-primary').addEventListener('click', () => {
-  const location = document.getElementById('primary-location').value.trim();
-  setPrimaryLocation(location);
-});
-
-// Event Listener for Preset Dropdown Button
+// Event Listener for Set Preset Location Button
 document.getElementById('set-preset').addEventListener('click', () => {
   const presetDropdown = document.getElementById('presets-dropdown');
   const selectedPreset = presetDropdown.value;
@@ -259,7 +243,7 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
     document.getElementById('comparison-input').value = '';
     document.getElementById('comparison-suggestions').innerHTML = '';
   } else if (!primaryCoords) {
-    alert('Please set the primary location first.');
+    alert('Please set the primary location first using the presets.');
   }
 });
 
@@ -285,11 +269,7 @@ function updateDistances() {
 
 // Close suggestions when clicking outside
 document.addEventListener('click', function(event) {
-  const primarySuggestions = document.getElementById('primary-suggestions');
   const comparisonSuggestions = document.getElementById('comparison-suggestions');
-  if (!document.getElementById('primary-location').contains(event.target)) {
-    primarySuggestions.innerHTML = '';
-  }
   if (!document.getElementById('comparison-input').contains(event.target)) {
     comparisonSuggestions.innerHTML = '';
   }
