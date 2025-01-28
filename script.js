@@ -7,7 +7,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// Initialize variables
 let primaryMarker = null;
 let primaryCoords = null;
 const comparisonMarkers = [];
@@ -232,8 +231,6 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
         comparisonMarkers.splice(index, 1);
         comparisonLayers.splice(index, 1);
       }
-      // Resort the comparison list after removal
-      sortComparisons();
     });
 
     // Sort the comparison list after adding a new location
