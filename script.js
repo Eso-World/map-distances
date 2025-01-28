@@ -24,14 +24,29 @@ function debounce(func, delay) {
 
 // Function to fetch suggestions from Nominatim
 async function fetchSuggestions(query) {
-  const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`);
-  const data = await response.json();
-  return data;
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching suggestions:', error);
+    return [];
+  }
 }
 
 // Function to render suggestions
 function renderSuggestions(suggestions, suggestionBox, inputField) {
   suggestionBox.innerHTML = '';
+  if (suggestions.length === 0) {
+    const noResult = document.createElement('div');
+    noResult.classList.add('suggestion-item');
+    noResult.textContent = 'No results found';
+    suggestionBox.appendChild(noResult);
+    return;
+  }
   suggestions.forEach(suggestion => {
     const div = document.createElement('div');
     div.classList.add('suggestion-item');
@@ -69,16 +84,25 @@ document.getElementById('comparison-input').addEventListener('input', debounce(a
 
 // Function to geocode a location using Nominatim
 async function geocode(location) {
-  const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
-  const data = await response.json();
-  if (data && data.length > 0) {
-    return {
-      lat: parseFloat(data[0].lat),
-      lon: parseFloat(data[0].lon),
-      display_name: data[0].display_name
-    };
-  } else {
-    alert(`Location not found: ${location}`);
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lon: parseFloat(data[0].lon),
+        display_name: data[0].display_name
+      };
+    } else {
+      alert(`Location not found: ${location}`);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error during geocoding:', error);
+    alert('An error occurred while searching for the location.');
     return null;
   }
 }
