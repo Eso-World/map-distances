@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Map Distance Calculator</title>
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-sA+e2o4IH1lEewLjVMNZYRttJtb/3qOzPI+EUPe3uE8="
+    crossorigin=""
+  />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    #controls {
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    #controls input[type="text"] {
+      padding: 8px;
+      width: 300px;
+      margin-right: 10px;
+    }
+
+    #controls button {
+      padding: 8px 12px;
+      margin-top: 10px;
+    }
+
+    #comparison-locations {
+      margin-top: 20px;
+    }
+
+    #comparison-locations ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #comparison-locations li {
+      padding: 5px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #comparison-locations button {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    #map {
+      height: 500px;
+      width: 100%;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #ddd;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Map Distance Calculator</h1>
+  </header>
+
+  <div id="controls">
+    <div>
+      <label for="primary-location">Primary Location:</label><br>
+      <input type="text" id="primary-location" placeholder="Enter primary location">
+      <button id="set-primary">Set Primary Location</button>
+    </div>
+
+    <div id="comparison-locations">
+      <h3>Comparison Locations:</h3>
+      <input type="text" id="comparison-input" placeholder="Enter comparison location">
+      <button id="add-comparison">Add Location</button>
+      <ul id="comparison-list"></ul>
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <footer>
+    &copy; 2025 Map Distance Calculator
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-o9N1j0gQyMkL9QbsGShqm4U3LkP3fAtN1tCkpeKZJv0="
+    crossorigin=""
+  ></script>
+  <script>
+    // Initialize the map
+    const map = L.map('map').setView([20, 0], 2); // World view
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let primaryMarker = null;
+    let primaryCoords = null;
+    const comparisonMarkers = [];
+    const comparisonLayers = [];
+
+    // Function to geocode a location using Nominatim
+    async function geocode(location) {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
+      const data = await response.json();
+      if (data && data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lon: parseFloat(data[0].lon),
+          display_name: data[0].display_name
+        };
+      } else {
+        alert(`Location not found: ${location}`);
+        return null;
+      }
+    }
+
+    // Function to calculate distance between two coordinates (Haversine formula)
+    function calculateDistance(coord1, coord2) {
+      const R = 6371; // Radius of the Earth in km
+      const dLat = (coord2.lat - coord1.lat) * Math.PI / 180;
+      const dLon = (coord2.lon - coord1.lon) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(coord1.lat * Math.PI / 180) * Math.cos(coord2.lat * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c;
+      return distance.toFixed(2); // in kilometers
+    }
+
+    // Set Primary Location
+    document.getElementById('set-primary').addEventListener('click', async () => {
+      const location = document.getElementById('primary-location').value.trim();
+      if (!location) {
+        alert('Please enter a primary location.');
+        return;
+      }
+      const result = await geocode(location);
+      if (result) {
+        primaryCoords = { lat: result.lat, lon: result.lon };
+        if (primaryMarker) {
+          map.removeLayer(primaryMarker);
+        }
+        primaryMarker = L.marker([primaryCoords.lat, primaryCoords.lon], { color: 'red' })
+          .addTo(map)
+          .bindPopup(`<b>Primary Location:</b><br>${result.display_name}`)
+          .openPopup();
+        map.setView([primaryCoords.lat, primaryCoords.lon], 10);
+
+        // Update distances for existing comparison locations
+        updateDistances();
+      }
+    });
+
+    // Add Comparison Location
+    document.getElementById('add-comparison').addEventListener('click', async () => {
+      const location = document.getElementById('comparison-input').value.trim();
+      if (!location) {
+        alert('Please enter a comparison location.');
+        return;
+      }
+      const result = await geocode(location);
+      if (result && primaryCoords) {
+        // Create list item
+        const li = document.createElement('li');
+        li.textContent = result.display_name;
+
+        const distanceSpan = document.createElement('span');
+        distanceSpan.textContent = `Distance: Calculating... km`;
+        li.appendChild(distanceSpan);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remove';
+        li.appendChild(removeBtn);
+
+        document.getElementById('comparison-list').appendChild(li);
+
+        // Add marker to map
+        const marker = L.marker([result.lat, result.lon]).addTo(map)
+          .bindPopup(`<b>Comparison Location:</b><br>${result.display_name}`);
+        comparisonMarkers.push(marker);
+
+        // Draw line
+        const line = L.polyline([
+          [primaryCoords.lat, primaryCoords.lon],
+          [result.lat, result.lon]
+        ], { color: 'blue' }).addTo(map);
+        comparisonLayers.push(line);
+
+        // Calculate distance
+        const distance = calculateDistance(primaryCoords, { lat: result.lat, lon: result.lon });
+        distanceSpan.textContent = `Distance: ${distance} km`;
+
+        // Remove functionality
+        removeBtn.addEventListener('click', () => {
+          map.removeLayer(marker);
+          map.removeLayer(line);
+          document.getElementById('comparison-list').removeChild(li);
+          const index = comparisonMarkers.indexOf(marker);
+          if (index > -1) {
+            comparisonMarkers.splice(index, 1);
+            comparisonLayers.splice(index, 1);
+          }
+        });
+
+        // Clear input
+        document.getElementById('comparison-input').value = '';
+      } else if (!primaryCoords) {
+        alert('Please set the primary location first.');
+      }
+    });
+
+    // Update distances when primary location changes
+    function updateDistances() {
+      const listItems = document.querySelectorAll('#comparison-list li');
+      listItems.forEach((li, index) => {
+        const distanceSpan = li.querySelector('span');
+        const marker = comparisonMarkers[index];
+        const coords = marker.getLatLng();
+        const distance = calculateDistance(primaryCoords, { lat: coords.lat, lon: coords.lng });
+        distanceSpan.textContent = `Distance: ${distance} km`;
+
+        // Update line
+        const line = comparisonLayers[index];
+        line.setLatLngs([
+          [primaryCoords.lat, primaryCoords.lon],
+          [coords.lat, coords.lng]
+        ]);
+      });
+    }
+
+  </script>
+</body>
+</html>
