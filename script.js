@@ -144,9 +144,8 @@ function sortComparisons() {
   });
 }
 
-// Set Primary Location
-document.getElementById('set-primary').addEventListener('click', async () => {
-  const location = document.getElementById('primary-location').value.trim();
+// Function to set Primary Location
+async function setPrimaryLocation(location) {
   if (!location) {
     alert('Please enter a primary location.');
     return;
@@ -169,9 +168,15 @@ document.getElementById('set-primary').addEventListener('click', async () => {
     // Sort comparison locations after updating distances
     sortComparisons();
   }
+}
+
+// Event Listener for Set Primary Location Button
+document.getElementById('set-primary').addEventListener('click', () => {
+  const location = document.getElementById('primary-location').value.trim();
+  setPrimaryLocation(location);
 });
 
-// Add Comparison Location
+// Event Listener for Add Comparison Location Button
 document.getElementById('add-comparison').addEventListener('click', async () => {
   const location = document.getElementById('comparison-input').value.trim();
   if (!location) {
@@ -231,6 +236,8 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
         comparisonMarkers.splice(index, 1);
         comparisonLayers.splice(index, 1);
       }
+      // Resort the comparison list after removal
+      sortComparisons();
     });
 
     // Sort the comparison list after adding a new location
@@ -244,7 +251,7 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
   }
 });
 
-// Update distances when primary location changes
+// Function to update distances when primary location changes
 function updateDistances() {
   comparisonMarkers.forEach((marker, index) => {
     const coords = marker.getLatLng();
@@ -263,6 +270,15 @@ function updateDistances() {
     ]);
   });
 }
+
+// Event Listener for Preset Buttons
+const presetButtons = document.querySelectorAll('.preset-btn');
+presetButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const address = button.getAttribute('data-address');
+    setPrimaryLocation(address);
+  });
+});
 
 // Close suggestions when clicking outside
 document.addEventListener('click', function(event) {
