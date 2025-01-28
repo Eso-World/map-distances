@@ -1,94 +1,156 @@
-/* General Styles */
-body {
-  font-family: Arial, sans-serif;
+/* Reset some basic styles */
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+/* Header Styling */
 header {
   background-color: #4CAF50;
   color: white;
-  padding: 15px;
+  padding: 20px 0;
   text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+header h1 {
+  font-size: 2em;
+}
+
+/* Controls Section */
 #controls {
   padding: 20px;
-  background-color: #f4f4f4;
+  background-color: #fff;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 30px;
+  max-width: 800px;
+  margin: 20px auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .location-input {
   position: relative;
-  width: 100%;
-  max-width: 500px;
+}
+
+.location-input label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
 }
 
 .location-input input[type="text"] {
-  padding: 8px;
   width: 100%;
-  box-sizing: border-box;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+  transition: border-color 0.3s ease;
 }
 
+.location-input input[type="text"]:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+/* Suggestions Dropdown */
 .suggestions {
   position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
   background: white;
   border: 1px solid #ccc;
   border-top: none;
-  max-height: 150px;
+  max-height: 200px;
   overflow-y: auto;
-  width: 100%;
   z-index: 1000;
+  border-radius: 0 0 4px 4px;
 }
 
 .suggestion-item {
-  padding: 8px;
+  padding: 10px 15px;
   cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
 }
 
 .suggestion-item:hover {
   background-color: #f0f0f0;
 }
 
-#controls button {
-  padding: 8px 12px;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-#comparison-locations {
+/* Comparison List */
+#comparison-list {
   margin-top: 20px;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
-#comparison-locations ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-#comparison-locations li {
-  padding: 5px 0;
+#comparison-list li {
+  padding: 10px 15px;
+  background-color: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-#comparison-locations button {
+#comparison-list li span {
+  font-size: 0.9em;
+  color: #555;
+}
+
+#comparison-list button {
   background-color: #f44336;
   color: white;
   border: none;
-  padding: 5px 10px;
+  padding: 6px 10px;
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease;
 }
 
+#comparison-list button:hover {
+  background-color: #d32f2f;
+}
+
+/* Map Styling */
 #map {
   height: 500px;
   width: 100%;
-}
-
-footer {
-  text-align: center;
-  padding: 10px;
-  background-color: #ddd;
+  max-width: 1200px;
+  margin: 20px auto;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
