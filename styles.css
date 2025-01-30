@@ -9,6 +9,9 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f9f9f9;
   color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Header Styling */
@@ -24,6 +27,14 @@ header h1 {
   font-size: 2em;
 }
 
+/* Main Content Styling */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* Controls Section */
 #controls {
   padding: 20px;
@@ -32,6 +43,7 @@ header h1 {
   flex-direction: column;
   gap: 30px;
   max-width: 800px;
+  width: 90%;
   margin: 20px auto;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -53,6 +65,7 @@ header h1 {
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1em;
+  transition: border-color 0.3s ease;
 }
 
 .location-input input[type="text"]:focus {
@@ -87,4 +100,56 @@ button:hover {
   border-top: none;
   max-height: 200px;
   overflow-y: auto;
-  z
+  z-index: 1000;
+}
+
+.suggestion-item {
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background-color: #f1f1f1;
+}
+
+/* Comparison List */
+#comparison-list {
+  list-style: none;
+  margin-top: 15px;
+}
+
+#comparison-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+#comparison-list li:last-child {
+  border-bottom: none;
+}
+
+#comparison-list li span {
+  font-size: 0.9em;
+  color: #555;
+}
+
+#comparison-list li button {
+  background-color: #e74c3c;
+}
+
+#comparison-list li button:hover {
+  background-color: #c0392b;
+}
+
+/* Map Styling */
+#map {
+  width: 90%;
+  max-width: 1000px;
+  height: 500px;
+  margin: 20px auto;
+  border: 2px solid #4CAF50;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
