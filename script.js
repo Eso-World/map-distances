@@ -7,6 +7,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
+// State Variables
 let primaryMarker = null;
 let primaryCoords = null;
 const comparisonMarkers = [];
@@ -25,7 +26,11 @@ function debounce(func, delay) {
 // Function to fetch suggestions from Nominatim
 async function fetchSuggestions(query) {
   try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`);
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`, {
+      headers: {
+        'User-Agent': 'MapDistanceCalculator/1.0 (your-email@example.com)'
+      }
+    });
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -85,7 +90,11 @@ document.getElementById('comparison-input').addEventListener('input', debounce(a
 // Function to geocode a location using Nominatim
 async function geocode(location) {
   try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`, {
+      headers: {
+        'User-Agent': 'MapDistanceCalculator/1.0 (your-email@example.com)'
+      }
+    });
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -113,9 +122,9 @@ function calculateDistance(coord1, coord2) {
   const dLat = (coord2.lat - coord1.lat) * Math.PI / 180;
   const dLon = (coord2.lon - coord1.lon) * Math.PI / 180;
   const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLat / 2) ** 2 +
     Math.cos(coord1.lat * Math.PI / 180) * Math.cos(coord2.lat * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.sin(dLon / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
   return distance.toFixed(2); // in kilometers
@@ -155,7 +164,10 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
   const result = await geocode(location);
   if (result && primaryCoords) {
     // Check for duplicate locations
-    const exists = comparisonMarkers.some(marker => marker.getLatLng().lat === result.lat && marker.getLatLng().lng === result.lon);
+    const exists = comparisonMarkers.some(marker => {
+      const markerPos = marker.getLatLng();
+      return markerPos.lat === result.lat && markerPos.lng === result.lon;
+    });
     if (exists) {
       alert('This location is already added as a comparison.');
       return;
@@ -176,7 +188,7 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
     document.getElementById('comparison-list').appendChild(li);
 
     // Add marker to map
-    const marker = L.marker([result.lat, result.lon]).addTo(map)
+    const marker = L.marker([result.lat, result.lon], { color: 'blue' }).addTo(map)
       .bindPopup(`<b>Comparison Location:</b><br>${result.display_name}`);
     comparisonMarkers.push(marker);
 
@@ -203,6 +215,9 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
       }
     });
 
+    // Adjust map view to include all markers
+    adjustMapView();
+
     // Clear input and suggestions
     document.getElementById('comparison-input').value = '';
     document.getElementById('comparison-suggestions').innerHTML = '';
@@ -211,7 +226,7 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
   }
 });
 
-// Update distances when primary location changes
+// Function to update distances when primary location changes
 function updateDistances() {
   const listItems = document.querySelectorAll('#comparison-list li');
   listItems.forEach((li, index) => {
@@ -228,6 +243,15 @@ function updateDistances() {
       [coords.lat, coords.lng]
     ]);
   });
+
+  // Adjust map view to include all markers
+  adjustMapView();
+}
+
+// Function to adjust the map view to include all markers
+function adjustMapView() {
+  const group = new L.featureGroup([primaryMarker, ...comparisonMarkers]);
+  map.fitBounds(group.getBounds().pad(0.5));
 }
 
 // Close suggestions when clicking outside
@@ -239,5 +263,20 @@ document.addEventListener('click', function(event) {
   }
   if (!document.getElementById('comparison-input').contains(event.target)) {
     comparisonSuggestions.innerHTML = '';
+  }
+});
+
+// Improve User Experience by allowing Enter key to trigger buttons
+document.getElementById('primary-location').addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    document.getElementById('set-primary').click();
+  }
+});
+
+document.getElementById('comparison-input').addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    document.getElementById('add-comparison').click();
   }
 });
