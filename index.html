@@ -9,7 +9,7 @@
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    /* Removed integrity and crossorigin attributes to prevent blocking */
+    /* Integrity and crossorigin attributes removed to prevent blocking */
   />
   
   <!-- External CSS -->
@@ -23,7 +23,7 @@
 
   <div id="controls">
     <div class="location-input">
-      <label for="primary-location">Primary Location:</label><br>
+      <label for="primary-location">Primary Location:</label>
       <input type="text" id="primary-location" placeholder="Enter primary location" autocomplete="off">
       <div class="suggestions" id="primary-suggestions"></div>
       <button id="set-primary">Set Primary Location</button>
@@ -40,14 +40,10 @@
 
   <div id="map"></div>
 
-  <footer>
-    &copy; 2025 Map Distance Calculator
-  </footer>
-
   <!-- Leaflet JS -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    /* Removed integrity and crossorigin attributes to prevent blocking */
+    /* Integrity and crossorigin attributes removed to prevent blocking */
   ></script>
   
   <!-- External JS -->
