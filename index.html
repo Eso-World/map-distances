@@ -5,12 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Map Distance Calculator</title>
   
-  <!-- Leaflet CSS with correct integrity and crossorigin -->
+  <!-- Leaflet CSS without integrity and crossorigin -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-sA+e2X5v+5hDgnLZV2DzIVtXcOStt2Kk5A6qn9+7i6g="
-    crossorigin=""
   />
   
   <!-- External CSS -->
@@ -26,17 +24,17 @@
   <div id="sidebar">
     <h3>Quick Addresses</h3>
     <div class="button-group">
-      <button class="address-button" data-address="Zur Luftbrücke 1, 31515 Wunstorf, Germany">1</button>
-      <button class="address-button" data-address="10, Sedanstraße, Weststadt, Ulm, Baden-Württemberg, 89077, Germany">2</button>
-      <button class="address-button" data-address="Claude-Dornier-Straße, 88090 Immenstaad am Bodensee, Germany">3</button>
-      <button class="address-button" data-address="Willy-Messerschmitt-Straße 1, 82024 Taufkirchen, Germany">4</button>
-      <button class="address-button" data-address="Gunnels Wood Rd, Stevenage SG1 2AS">5</button>
-      <button class="address-button" data-address="Av. Maestranza Aérea, 41011 Sevilla, Spain">6</button>
-      <button class="address-button" data-address="Anchorage Road, Portsmouth PO3 5PU">7</button>
-      <button class="address-button" data-address="Rechliner Str., 85077 Manching, Germany">8</button>
-      <button class="address-button" data-address="Quadrant House, Celtic Springs Business Park, Duffryn, Newport NP10 8FZ">9</button>
-      <button class="address-button" data-address="Partnership House, Regent Farm Rd, Newcastle upon Tyne NE3 3AF">10</button>
-      <button class="address-button" data-address="ZA Clef de Saint Pierre, 1 Bd Jean Moulin, 78990 Élancourt, France">11</button>
+      <button class="address-button" data-index="0">1</button>
+      <button class="address-button" data-index="1">2</button>
+      <button class="address-button" data-index="2">3</button>
+      <button class="address-button" data-index="3">4</button>
+      <button class="address-button" data-index="4">5</button>
+      <button class="address-button" data-index="5">6</button>
+      <button class="address-button" data-index="6">7</button>
+      <button class="address-button" data-index="7">8</button>
+      <button class="address-button" data-index="8">9</button>
+      <button class="address-button" data-index="9">10</button>
+      <button class="address-button" data-index="10">11</button>
     </div>
     <div id="copy-feedback" class="hidden">Address Copied!</div>
   </div>
@@ -62,11 +60,9 @@
     <div id="map"></div>
   </main>
 
-  <!-- Leaflet JS with correct integrity and crossorigin -->
+  <!-- Leaflet JS without integrity and crossorigin -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-o9N1j6Ec1g1urV6njbXnD0hUg6jNLaa8XMBGHFzjY2M="
-    crossorigin=""
   ></script>
   
   <!-- External JS -->
