@@ -27,7 +27,8 @@ header h1 {
   font-size: 2em;
 }
 
-/* Sidebar Styling */
+/* Removed Sidebar Styling */
+/*
 #sidebar {
   position: fixed;
   top: 80px; /* Adjust based on header height */
@@ -70,9 +71,11 @@ header h1 {
 }
 */
 
-/* Adjust main content to accommodate sidebar */
+/* Adjust main content to occupy full width */
 main {
-  margin-left: 200px; /* Adjust based on sidebar width */
+  margin: 20px auto; /* Centered with automatic margins */
+  width: 90%; /* Adjust as needed */
+  max-width: 1200px; /* Optional max width */
 }
 
 /* Controls Section */
@@ -83,8 +86,8 @@ main {
   flex-direction: column;
   gap: 30px;
   max-width: 800px;
-  width: 90%;
-  margin: 20px auto;
+  width: 100%;
+  margin: 0 auto 20px auto; /* Centered with margin bottom */
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -185,8 +188,7 @@ button:hover {
 
 /* Map Styling */
 #map {
-  width: 90%;
-  max-width: 1000px;
+  width: 100%;
   height: 500px;
   margin: 20px auto;
   border: 2px solid #4CAF50;
@@ -196,13 +198,7 @@ button:hover {
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-  #sidebar {
-    position: static;
-    width: 100%;
-    margin-bottom: 20px;
-  }
-
   main {
-    margin-left: 0;
+    width: 95%;
   }
 }
