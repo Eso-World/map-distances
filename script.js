@@ -130,6 +130,53 @@ function calculateDistance(coord1, coord2) {
   return distance.toFixed(2); // in kilometers
 }
 
+// Helper function to create a list item
+function createListItem(location, distance, marker, line) {
+  const li = document.createElement('li');
+  li.textContent = location.display_name;
+  li.setAttribute('data-distance', distance); // Set data-distance attribute
+
+  const distanceSpan = document.createElement('span');
+  distanceSpan.textContent = `Distance: ${distance} km`;
+  li.appendChild(distanceSpan);
+
+  const removeBtn = document.createElement('button');
+  removeBtn.textContent = 'Remove';
+  li.appendChild(removeBtn);
+
+  // Remove functionality
+  removeBtn.addEventListener('click', () => {
+    map.removeLayer(marker);
+    map.removeLayer(line);
+    document.getElementById('comparison-list').removeChild(li);
+    const index = comparisonMarkers.indexOf(marker);
+    if (index > -1) {
+      comparisonMarkers.splice(index, 1);
+      comparisonLayers.splice(index, 1);
+    }
+    adjustMapView();
+  });
+
+  return li;
+}
+
+// Function to insert list item in sorted order
+function insertListItemSorted(li) {
+  const list = document.getElementById('comparison-list');
+  const distance = parseFloat(li.getAttribute('data-distance'));
+  const items = list.getElementsByTagName('li');
+
+  for (let i = 0; i < items.length; i++) {
+    const currentDistance = parseFloat(items[i].getAttribute('data-distance'));
+    if (distance < currentDistance) {
+      list.insertBefore(li, items[i]);
+      return;
+    }
+  }
+  // If not inserted yet, append at the end
+  list.appendChild(li);
+}
+
 // Set Primary Location
 document.getElementById('set-primary').addEventListener('click', async () => {
   const location = document.getElementById('primary-location').value.trim();
@@ -173,21 +220,10 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
       return;
     }
 
-    // Create list item
-    const li = document.createElement('li');
-    li.textContent = result.display_name;
+    // Calculate distance
+    const distance = calculateDistance(primaryCoords, { lat: result.lat, lon: result.lon });
 
-    const distanceSpan = document.createElement('span');
-    distanceSpan.textContent = `Distance: Calculating... km`;
-    li.appendChild(distanceSpan);
-
-    const removeBtn = document.createElement('button');
-    removeBtn.textContent = 'Remove';
-    li.appendChild(removeBtn);
-
-    document.getElementById('comparison-list').appendChild(li);
-
-    // Add marker to map
+    // Create marker
     const marker = L.marker([result.lat, result.lon], { color: 'blue' }).addTo(map)
       .bindPopup(`<b>Comparison Location:</b><br>${result.display_name}`);
     comparisonMarkers.push(marker);
@@ -199,21 +235,11 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
     ], { color: 'blue' }).addTo(map);
     comparisonLayers.push(line);
 
-    // Calculate distance
-    const distance = calculateDistance(primaryCoords, { lat: result.lat, lon: result.lon });
-    distanceSpan.textContent = `Distance: ${distance} km`;
+    // Create list item
+    const li = createListItem(result, distance, marker, line);
 
-    // Remove functionality
-    removeBtn.addEventListener('click', () => {
-      map.removeLayer(marker);
-      map.removeLayer(line);
-      document.getElementById('comparison-list').removeChild(li);
-      const index = comparisonMarkers.indexOf(marker);
-      if (index > -1) {
-        comparisonMarkers.splice(index, 1);
-        comparisonLayers.splice(index, 1);
-      }
-    });
+    // Insert list item in sorted order
+    insertListItemSorted(li);
 
     // Adjust map view to include all markers
     adjustMapView();
@@ -236,6 +262,9 @@ function updateDistances() {
     const distance = calculateDistance(primaryCoords, { lat: coords.lat, lon: coords.lng });
     distanceSpan.textContent = `Distance: ${distance} km`;
 
+    // Update data-distance attribute
+    li.setAttribute('data-distance', distance);
+
     // Update line
     const line = comparisonLayers[index];
     line.setLatLngs([
@@ -244,14 +273,35 @@ function updateDistances() {
     ]);
   });
 
+  // Sort the list based on updated distances
+  sortComparisonList();
+  
   // Adjust map view to include all markers
   adjustMapView();
 }
 
+// Function to sort the comparison list based on data-distance
+function sortComparisonList() {
+  const list = document.getElementById('comparison-list');
+  const items = Array.from(list.getElementsByTagName('li'));
+
+  items.sort((a, b) => {
+    return parseFloat(a.getAttribute('data-distance')) - parseFloat(b.getAttribute('data-distance'));
+  });
+
+  // Clear the list and re-append sorted items
+  list.innerHTML = '';
+  items.forEach(item => list.appendChild(item));
+}
+
 // Function to adjust the map view to include all markers
 function adjustMapView() {
-  const group = new L.featureGroup([primaryMarker, ...comparisonMarkers]);
-  map.fitBounds(group.getBounds().pad(0.5));
+  if (primaryMarker && comparisonMarkers.length > 0) {
+    const group = new L.featureGroup([primaryMarker, ...comparisonMarkers]);
+    map.fitBounds(group.getBounds().pad(0.5));
+  } else if (primaryMarker) {
+    map.setView(primaryMarker.getLatLng(), 10);
+  }
 }
 
 // Close suggestions when clicking outside
