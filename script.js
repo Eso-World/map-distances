@@ -333,6 +333,21 @@ document.getElementById('comparison-input').addEventListener('keydown', function
 
 /* ======= Copy to Clipboard Functionality ======= */
 
+// Predefined addresses corresponding to each button
+const predefinedAddresses = [
+  "Zur Luftbrücke 1, 31515 Wunstorf, Germany",
+  "10, Sedanstraße, Weststadt, Ulm, Baden-Württemberg, 89077, Germany",
+  "Claude-Dornier-Straße, 88090 Immenstaad am Bodensee, Germany",
+  "Willy-Messerschmitt-Straße 1, 82024 Taufkirchen, Germany",
+  "Gunnels Wood Rd, Stevenage SG1 2AS",
+  "Av. Maestranza Aérea, 41011 Sevilla, Spain",
+  "Anchorage Road, Portsmouth PO3 5PU",
+  "Rechliner Str., 85077 Manching, Germany",
+  "Quadrant House, Celtic Springs Business Park, Duffryn, Newport NP10 8FZ",
+  "Partnership House, Regent Farm Rd, Newcastle upon Tyne NE3 3AF",
+  "ZA Clef de Saint Pierre, 1 Bd Jean Moulin, 78990 Élancourt, France"
+];
+
 // Select all address buttons
 const addressButtons = document.querySelectorAll('.address-button');
 const copyFeedback = document.getElementById('copy-feedback');
@@ -404,7 +419,8 @@ function highlightButton(button) {
 // Add click event listeners to address buttons
 addressButtons.forEach(button => {
   button.addEventListener('click', () => {
-    const address = button.getAttribute('data-address');
+    const index = parseInt(button.getAttribute('data-index'), 10);
+    const address = predefinedAddresses[index];
     if (address) {
       copyToClipboard(address, button);
     }
