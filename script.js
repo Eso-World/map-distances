@@ -1,12 +1,15 @@
-// Initialize the map
-const map = L.map('map').setView([20, 0], 2); // World view
+// Replace with your actual Mapbox access token
+mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
 
-// Add OpenStreetMap tiles
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+// Initialize the Mapbox map
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/streets-v12', // Choose your preferred map style
+  center: [0, 20], // Initial map center [lng, lat]
+  zoom: 2
+});
 
+// Initialize variables
 let primaryMarker = null;
 let primaryCoords = null;
 const comparisonMarkers = [];
@@ -59,7 +62,7 @@ function renderSuggestions(suggestions, suggestionBox, inputField) {
   });
 }
 
-// Add event listeners for autocomplete with real-time suggestions
+// Add event listener for autocomplete on comparison input
 document.getElementById('comparison-input').addEventListener('input', debounce(async function() {
   const query = this.value.trim();
   const suggestionBox = document.getElementById('comparison-suggestions');
@@ -114,7 +117,7 @@ function calculateDistance(coord1, coord2) {
 function sortComparisons() {
   // Create an array of objects containing marker, layer, list item, and distance
   const comparisons = comparisonMarkers.map((marker, index) => {
-    const coords = marker.getLatLng();
+    const coords = marker.getLngLat();
     const distance = parseFloat(calculateDistance(primaryCoords, { lat: coords.lat, lon: coords.lng }));
     const listItem = document.querySelectorAll('#comparison-list li')[index];
     return { marker, layer: comparisonLayers[index], listItem, distance };
@@ -133,7 +136,7 @@ function sortComparisons() {
   });
 }
 
-// Function to set Primary Location
+// Function to set Primary Location based on preset
 async function setPrimaryLocation(location) {
   if (!location) {
     alert('Please select a preset location.');
@@ -142,14 +145,25 @@ async function setPrimaryLocation(location) {
   const result = await geocode(location);
   if (result) {
     primaryCoords = { lat: result.lat, lon: result.lon };
+    
+    // Remove existing primary marker if any
     if (primaryMarker) {
-      map.removeLayer(primaryMarker);
+      primaryMarker.remove();
     }
-    primaryMarker = L.marker([primaryCoords.lat, primaryCoords.lon], { color: 'red' })
+
+    // Add new primary marker
+    primaryMarker = new mapboxgl.Marker({ color: 'red' })
+      .setLngLat([primaryCoords.lon, primaryCoords.lat])
+      .setPopup(new mapboxgl.Popup().setHTML(`<b>Primary Location:</b><br>${result.display_name}`))
       .addTo(map)
-      .bindPopup(`<b>Primary Location:</b><br>${result.display_name}`)
-      .openPopup();
-    map.setView([primaryCoords.lat, primaryCoords.lon], 10);
+      .togglePopup();
+
+    // Center map on primary location
+    map.flyTo({
+      center: [primaryCoords.lon, primaryCoords.lat],
+      zoom: 10,
+      essential: true
+    });
 
     // Update distances for existing comparison locations
     updateDistances();
@@ -181,7 +195,7 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
   const result = await geocode(location);
   if (result && primaryCoords) {
     // Check for duplicate locations
-    const exists = comparisonMarkers.some(marker => marker.getLatLng().lat === result.lat && marker.getLatLng().lng === result.lon);
+    const exists = comparisonMarkers.some(marker => marker.getLngLat().lat === result.lat && marker.getLngLat().lng === result.lon);
     if (exists) {
       alert('This location is already added as a comparison.');
       return;
@@ -205,17 +219,67 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
 
     document.getElementById('comparison-list').appendChild(li);
 
-    // Add marker to map
-    const marker = L.marker([result.lat, result.lon]).addTo(map)
-      .bindPopup(`<b>Comparison Location:</b><br>${result.display_name}`);
+    // Add comparison marker
+    const marker = new mapboxgl.Marker({ color: 'blue' })
+      .setLngLat([result.lon, result.lat])
+      .setPopup(new mapboxgl.Popup().setHTML(`<b>Comparison Location:</b><br>${result.display_name}`))
+      .addTo(map);
     comparisonMarkers.push(marker);
 
-    // Draw line
-    const line = L.polyline([
-      [primaryCoords.lat, primaryCoords.lon],
-      [result.lat, result.lon]
-    ], { color: 'blue' }).addTo(map);
-    comparisonLayers.push(line);
+    // Draw line between primary and comparison location
+    const lineId = `line-${Date.now()}`;
+    const line = new mapboxgl.Marker()
+      .setLngLat([primaryCoords.lon, primaryCoords.lat])
+      .addTo(map); // Placeholder, Mapbox GL JS doesn't support drawing lines directly with markers
+
+    // To draw lines, we need to add a GeoJSON source and a layer
+    const geojson = {
+      'type': 'FeatureCollection',
+      'features': [{
+        'type': 'Feature',
+        'geometry': {
+          'type': 'LineString',
+          'coordinates': [
+            [primaryCoords.lon, primaryCoords.lat],
+            [result.lon, result.lat]
+          ]
+        }
+      }]
+    };
+
+    // Add the line to the map
+    if (!map.getSource('comparison-lines')) {
+      map.addSource('comparison-lines', {
+        'type': 'geojson',
+        'data': geojson
+      });
+      map.addLayer({
+        'id': 'comparison-lines',
+        'type': 'line',
+        'source': 'comparison-lines',
+        'layout': {},
+        'paint': {
+          'line-color': '#888',
+          'line-width': 2
+        }
+      });
+    } else {
+      // If the source already exists, append the new line
+      const existingData = map.getSource('comparison-lines')._data;
+      existingData.features.push({
+        'type': 'Feature',
+        'geometry': {
+          'type': 'LineString',
+          'coordinates': [
+            [primaryCoords.lon, primaryCoords.lat],
+            [result.lon, result.lat]
+          ]
+        }
+      });
+      map.getSource('comparison-lines').setData(existingData);
+    }
+
+    comparisonLayers.push(line); // Not used in Mapbox GL JS; lines are managed via GeoJSON
 
     // Calculate distance
     const distance = calculateDistance(primaryCoords, { lat: result.lat, lon: result.lon });
@@ -223,14 +287,24 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
 
     // Remove functionality
     removeBtn.addEventListener('click', () => {
-      map.removeLayer(marker);
-      map.removeLayer(line);
-      document.getElementById('comparison-list').removeChild(li);
+      // Remove marker
+      marker.remove();
       const index = comparisonMarkers.indexOf(marker);
       if (index > -1) {
         comparisonMarkers.splice(index, 1);
         comparisonLayers.splice(index, 1);
       }
+
+      // Remove corresponding line from GeoJSON
+      const source = map.getSource('comparison-lines');
+      if (source) {
+        const data = source._data;
+        data.features.splice(index, 1);
+        source.setData(data);
+      }
+
+      // Remove list item
+      document.getElementById('comparison-list').removeChild(li);
     });
 
     // Sort the comparison list after adding a new location
@@ -247,7 +321,7 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
 // Function to update distances when primary location changes
 function updateDistances() {
   comparisonMarkers.forEach((marker, index) => {
-    const coords = marker.getLatLng();
+    const coords = marker.getLngLat();
     const distance = calculateDistance(primaryCoords, { lat: coords.lat, lon: coords.lng });
     const listItem = document.querySelectorAll('#comparison-list li')[index];
     if (listItem) {
@@ -255,12 +329,16 @@ function updateDistances() {
       distanceSpan.textContent = `Distance: ${distance} km`;
     }
 
-    // Update line
-    const line = comparisonLayers[index];
-    line.setLatLngs([
-      [primaryCoords.lat, primaryCoords.lon],
-      [coords.lat, coords.lng]
-    ]);
+    // Update line in GeoJSON
+    const source = map.getSource('comparison-lines');
+    if (source) {
+      const data = source._data;
+      data.features[index].geometry.coordinates = [
+        [primaryCoords.lon, primaryCoords.lat],
+        [coords.lng, coords.lat]
+      ];
+      source.setData(data);
+    }
   });
 }
 
