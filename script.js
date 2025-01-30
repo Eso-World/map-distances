@@ -1,19 +1,16 @@
-// Replace with your actual Mapbox access token
-mapboxgl.accessToken = 'pk.eyJ1Ijoic2VyZ2lvMzciLCJhIjoiY20yam5lN3V4MDg0czJqcjBzYm90ZWFpeSJ9.axoO1GoQ5weLtjCxXq4ABw';
+// Initialize the map
+const map = L.map('map').setView([20, 0], 2); // World view
 
-// Initialize the Mapbox map
-const map = new mapboxgl.Map({
-  container: 'map',
-  style: 'mapbox://styles/mapbox/streets-v12', // Choose your preferred map style
-  center: [0, 20], // Initial map center [lng, lat]
-  zoom: 2
-});
+// Add OpenStreetMap tiles
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
 
-// Initialize variables
 let primaryMarker = null;
 let primaryCoords = null;
 const comparisonMarkers = [];
-const comparisonLines = [];
+const comparisonLayers = [];
 
 // Debounce function to limit the rate of API calls
 function debounce(func, delay) {
@@ -27,29 +24,14 @@ function debounce(func, delay) {
 
 // Function to fetch suggestions from Nominatim
 async function fetchSuggestions(query) {
-  try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching suggestions:', error);
-    return [];
-  }
+  const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`);
+  const data = await response.json();
+  return data;
 }
 
 // Function to render suggestions
 function renderSuggestions(suggestions, suggestionBox, inputField) {
   suggestionBox.innerHTML = '';
-  if (suggestions.length === 0) {
-    const noResult = document.createElement('div');
-    noResult.classList.add('suggestion-item');
-    noResult.textContent = 'No results found';
-    suggestionBox.appendChild(noResult);
-    return;
-  }
   suggestions.forEach(suggestion => {
     const div = document.createElement('div');
     div.classList.add('suggestion-item');
@@ -62,7 +44,18 @@ function renderSuggestions(suggestions, suggestionBox, inputField) {
   });
 }
 
-// Add event listener for autocomplete on comparison input
+// Add event listeners for autocomplete
+document.getElementById('primary-location').addEventListener('input', debounce(async function() {
+  const query = this.value.trim();
+  const suggestionBox = document.getElementById('primary-suggestions');
+  if (query.length < 3) {
+    suggestionBox.innerHTML = '';
+    return;
+  }
+  const suggestions = await fetchSuggestions(query);
+  renderSuggestions(suggestions, suggestionBox, this);
+}, 300));
+
 document.getElementById('comparison-input').addEventListener('input', debounce(async function() {
   const query = this.value.trim();
   const suggestionBox = document.getElementById('comparison-suggestions');
@@ -76,25 +69,16 @@ document.getElementById('comparison-input').addEventListener('input', debounce(a
 
 // Function to geocode a location using Nominatim
 async function geocode(location) {
-  try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const data = await response.json();
-    if (data && data.length > 0) {
-      return {
-        lat: parseFloat(data[0].lat),
-        lon: parseFloat(data[0].lon),
-        display_name: data[0].display_name
-      };
-    } else {
-      alert(`Location not found: ${location}`);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error during geocoding:', error);
-    alert('An error occurred while searching for the location.');
+  const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
+  const data = await response.json();
+  if (data && data.length > 0) {
+    return {
+      lat: parseFloat(data[0].lat),
+      lon: parseFloat(data[0].lon),
+      display_name: data[0].display_name
+    };
+  } else {
+    alert(`Location not found: ${location}`);
     return null;
   }
 }
@@ -113,80 +97,31 @@ function calculateDistance(coord1, coord2) {
   return distance.toFixed(2); // in kilometers
 }
 
-// Function to sort comparison locations by distance
-function sortComparisons() {
-  // Create an array of objects containing marker, line, list item, and distance
-  const comparisons = comparisonMarkers.map((marker, index) => {
-    const coords = marker.getLngLat();
-    const distance = parseFloat(calculateDistance(primaryCoords, { lat: coords.lat, lon: coords.lng }));
-    const listItem = document.querySelectorAll('#comparison-list li')[index];
-    const line = comparisonLines[index];
-    return { marker, line, listItem, distance };
-  });
-
-  // Sort the array based on distance
-  comparisons.sort((a, b) => a.distance - b.distance);
-
-  // Clear the existing list
-  const comparisonList = document.getElementById('comparison-list');
-  comparisonList.innerHTML = '';
-
-  // Re-add the list items in sorted order
-  comparisons.forEach(comp => {
-    comparisonList.appendChild(comp.listItem);
-  });
-}
-
-// Function to set Primary Location based on preset
-async function setPrimaryLocation(location) {
+// Set Primary Location
+document.getElementById('set-primary').addEventListener('click', async () => {
+  const location = document.getElementById('primary-location').value.trim();
   if (!location) {
-    alert('Please select a preset location.');
+    alert('Please enter a primary location.');
     return;
   }
   const result = await geocode(location);
   if (result) {
     primaryCoords = { lat: result.lat, lon: result.lon };
-    
-    // Remove existing primary marker if any
     if (primaryMarker) {
-      primaryMarker.remove();
+      map.removeLayer(primaryMarker);
     }
-
-    // Add new primary marker
-    primaryMarker = new mapboxgl.Marker({ color: 'red' })
-      .setLngLat([primaryCoords.lon, primaryCoords.lat])
-      .setPopup(new mapboxgl.Popup().setHTML(`<b>Primary Location:</b><br>${result.display_name}`))
+    primaryMarker = L.marker([primaryCoords.lat, primaryCoords.lon], { color: 'red' })
       .addTo(map)
-      .togglePopup();
-
-    // Center map on primary location
-    map.flyTo({
-      center: [primaryCoords.lon, primaryCoords.lat],
-      zoom: 10,
-      essential: true
-    });
+      .bindPopup(`<b>Primary Location:</b><br>${result.display_name}`)
+      .openPopup();
+    map.setView([primaryCoords.lat, primaryCoords.lon], 10);
 
     // Update distances for existing comparison locations
     updateDistances();
-
-    // Sort comparison locations after updating distances
-    sortComparisons();
-  }
-}
-
-// Event Listener for Set Preset Location Button
-document.getElementById('set-preset').addEventListener('click', () => {
-  const presetDropdown = document.getElementById('presets-dropdown');
-  const selectedPreset = presetDropdown.value;
-  if (selectedPreset) {
-    setPrimaryLocation(selectedPreset);
-    presetDropdown.selectedIndex = 0; // Reset dropdown to default
-  } else {
-    alert('Please select a preset location.');
   }
 });
 
-// Event Listener for Add Comparison Location Button
+// Add Comparison Location
 document.getElementById('add-comparison').addEventListener('click', async () => {
   const location = document.getElementById('comparison-input').value.trim();
   if (!location) {
@@ -196,7 +131,7 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
   const result = await geocode(location);
   if (result && primaryCoords) {
     // Check for duplicate locations
-    const exists = comparisonMarkers.some(marker => marker.getLngLat().lat === result.lat && marker.getLngLat().lng === result.lon);
+    const exists = comparisonMarkers.some(marker => marker.getLatLng().lat === result.lat && marker.getLatLng().lng === result.lon);
     if (exists) {
       alert('This location is already added as a comparison.');
       return;
@@ -204,67 +139,29 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
 
     // Create list item
     const li = document.createElement('li');
-
-    const locationDiv = document.createElement('div');
-    locationDiv.textContent = result.display_name;
+    li.textContent = result.display_name;
 
     const distanceSpan = document.createElement('span');
     distanceSpan.textContent = `Distance: Calculating... km`;
+    li.appendChild(distanceSpan);
 
     const removeBtn = document.createElement('button');
     removeBtn.textContent = 'Remove';
-
-    li.appendChild(locationDiv);
-    li.appendChild(distanceSpan);
     li.appendChild(removeBtn);
 
     document.getElementById('comparison-list').appendChild(li);
 
-    // Add comparison marker
-    const marker = new mapboxgl.Marker({ color: 'blue' })
-      .setLngLat([result.lon, result.lat])
-      .setPopup(new mapboxgl.Popup().setHTML(`<b>Comparison Location:</b><br>${result.display_name}`))
-      .addTo(map);
+    // Add marker to map
+    const marker = L.marker([result.lat, result.lon]).addTo(map)
+      .bindPopup(`<b>Comparison Location:</b><br>${result.display_name}`);
     comparisonMarkers.push(marker);
 
-    // Draw line between primary and comparison location using GeoJSON
-    const geojson = {
-      'type': 'Feature',
-      'geometry': {
-        'type': 'LineString',
-        'coordinates': [
-          [primaryCoords.lon, primaryCoords.lat],
-          [result.lon, result.lat]
-        ]
-      }
-    };
-
-    if (!map.getSource('comparison-lines')) {
-      map.addSource('comparison-lines', {
-        'type': 'geojson',
-        'data': {
-          'type': 'FeatureCollection',
-          'features': [geojson]
-        }
-      });
-      map.addLayer({
-        'id': 'comparison-lines',
-        'type': 'line',
-        'source': 'comparison-lines',
-        'layout': {},
-        'paint': {
-          'line-color': '#888',
-          'line-width': 2
-        }
-      });
-    } else {
-      // If the source already exists, append the new line
-      const existingData = map.getSource('comparison-lines')._data;
-      existingData.features.push(geojson);
-      map.getSource('comparison-lines').setData(existingData);
-    }
-
-    comparisonLines.push(geojson); // Store the GeoJSON for potential future use
+    // Draw line
+    const line = L.polyline([
+      [primaryCoords.lat, primaryCoords.lon],
+      [result.lat, result.lon]
+    ], { color: 'blue' }).addTo(map);
+    comparisonLayers.push(line);
 
     // Calculate distance
     const distance = calculateDistance(primaryCoords, { lat: result.lat, lon: result.lon });
@@ -272,68 +169,50 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
 
     // Remove functionality
     removeBtn.addEventListener('click', () => {
-      // Remove marker
-      marker.remove();
+      map.removeLayer(marker);
+      map.removeLayer(line);
+      document.getElementById('comparison-list').removeChild(li);
       const index = comparisonMarkers.indexOf(marker);
       if (index > -1) {
         comparisonMarkers.splice(index, 1);
-        // Remove corresponding line from GeoJSON
-        const source = map.getSource('comparison-lines');
-        if (source) {
-          const data = source._data;
-          data.features.splice(index, 1);
-          source.setData(data);
-          comparisonLines.splice(index, 1);
-        }
+        comparisonLayers.splice(index, 1);
       }
-
-      // Remove list item
-      document.getElementById('comparison-list').removeChild(li);
-
-      // Sort the comparison list after removal
-      sortComparisons();
     });
-
-    // Sort the comparison list after adding a new location
-    sortComparisons();
 
     // Clear input and suggestions
     document.getElementById('comparison-input').value = '';
     document.getElementById('comparison-suggestions').innerHTML = '';
   } else if (!primaryCoords) {
-    alert('Please set the primary location first using the presets.');
+    alert('Please set the primary location first.');
   }
 });
 
-// Function to update distances when primary location changes
+// Update distances when primary location changes
 function updateDistances() {
-  comparisonMarkers.forEach((marker, index) => {
-    const coords = marker.getLngLat();
+  const listItems = document.querySelectorAll('#comparison-list li');
+  listItems.forEach((li, index) => {
+    const distanceSpan = li.querySelector('span');
+    const marker = comparisonMarkers[index];
+    const coords = marker.getLatLng();
     const distance = calculateDistance(primaryCoords, { lat: coords.lat, lon: coords.lng });
-    const listItem = document.querySelectorAll('#comparison-list li')[index];
-    if (listItem) {
-      const distanceSpan = listItem.querySelector('span');
-      distanceSpan.textContent = `Distance: ${distance} km`;
-    }
+    distanceSpan.textContent = `Distance: ${distance} km`;
 
-    // Update corresponding line in GeoJSON
-    const source = map.getSource('comparison-lines');
-    if (source) {
-      const data = source._data;
-      if (data.features[index]) {
-        data.features[index].geometry.coordinates = [
-          [primaryCoords.lon, primaryCoords.lat],
-          [coords.lng, coords.lat]
-        ];
-        source.setData(data);
-      }
-    }
+    // Update line
+    const line = comparisonLayers[index];
+    line.setLatLngs([
+      [primaryCoords.lat, primaryCoords.lon],
+      [coords.lat, coords.lng]
+    ]);
   });
 }
 
 // Close suggestions when clicking outside
 document.addEventListener('click', function(event) {
+  const primarySuggestions = document.getElementById('primary-suggestions');
   const comparisonSuggestions = document.getElementById('comparison-suggestions');
+  if (!document.getElementById('primary-location').contains(event.target)) {
+    primarySuggestions.innerHTML = '';
+  }
   if (!document.getElementById('comparison-input').contains(event.target)) {
     comparisonSuggestions.innerHTML = '';
   }
