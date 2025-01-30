@@ -9,7 +9,8 @@
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    /* Integrity and crossorigin attributes removed to prevent blocking */
+    integrity="sha256-sA+g+1oM3xCMpFUZj1yz4r5R1lE1H6W1KgjLHQaTqe0="
+    crossorigin=""
   />
   
   <!-- External CSS -->
@@ -21,29 +22,32 @@
     <h1>Map Distance Calculator</h1>
   </header>
 
-  <div id="controls">
-    <div class="location-input">
-      <label for="primary-location">Primary Location:</label>
-      <input type="text" id="primary-location" placeholder="Enter primary location" autocomplete="off">
-      <div class="suggestions" id="primary-suggestions"></div>
-      <button id="set-primary">Set Primary Location</button>
+  <main>
+    <div id="controls">
+      <div class="location-input">
+        <label for="primary-location">Primary Location:</label>
+        <input type="text" id="primary-location" placeholder="Enter primary location" autocomplete="off">
+        <div class="suggestions" id="primary-suggestions"></div>
+        <button id="set-primary">Set Primary Location</button>
+      </div>
+
+      <div class="location-input" id="comparison-locations-section">
+        <h3>Comparison Locations:</h3>
+        <input type="text" id="comparison-input" placeholder="Enter comparison location" autocomplete="off">
+        <div class="suggestions" id="comparison-suggestions"></div>
+        <button id="add-comparison">Add Location</button>
+        <ul id="comparison-list"></ul>
+      </div>
     </div>
 
-    <div class="location-input" id="comparison-locations-section">
-      <h3>Comparison Locations:</h3>
-      <input type="text" id="comparison-input" placeholder="Enter comparison location" autocomplete="off">
-      <div class="suggestions" id="comparison-suggestions"></div>
-      <button id="add-comparison">Add Location</button>
-      <ul id="comparison-list"></ul>
-    </div>
-  </div>
-
-  <div id="map"></div>
+    <div id="map"></div>
+  </main>
 
   <!-- Leaflet JS -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    /* Integrity and crossorigin attributes removed to prevent blocking */
+    integrity="sha256-o9N1jJ6B+E6wvju2TxF0E6A56gkX3zDm0a1fV0jzjXU="
+    crossorigin=""
   ></script>
   
   <!-- External JS -->
