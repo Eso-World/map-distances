@@ -331,7 +331,7 @@ document.getElementById('comparison-input').addEventListener('keydown', function
   }
 });
 
-/* ======= New Code for Copying Addresses ======= */
+/* ======= Copy to Clipboard Functionality ======= */
 
 // Select all address buttons
 const addressButtons = document.querySelectorAll('.address-button');
