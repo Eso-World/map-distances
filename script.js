@@ -1,5 +1,5 @@
 // Replace with your actual Mapbox access token
-mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
+mapboxgl.accessToken = 'pk.eyJ1Ijoic2VyZ2lvMzciLCJhIjoiY202ajVneHJsMGdhbDJsczNsN29kOGhkYyJ9.zrcQNkag1X8lSVzwoa3XTQ';
 
 // Initialize the Mapbox map
 const map = new mapboxgl.Map({
@@ -226,32 +226,25 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
       .addTo(map);
     comparisonMarkers.push(marker);
 
-    // Draw line between primary and comparison location
-    const lineId = `line-${Date.now()}`;
-    const line = new mapboxgl.Marker()
-      .setLngLat([primaryCoords.lon, primaryCoords.lat])
-      .addTo(map); // Placeholder, Mapbox GL JS doesn't support drawing lines directly with markers
-
-    // To draw lines, we need to add a GeoJSON source and a layer
+    // Draw line between primary and comparison location using GeoJSON
     const geojson = {
-      'type': 'FeatureCollection',
-      'features': [{
-        'type': 'Feature',
-        'geometry': {
-          'type': 'LineString',
-          'coordinates': [
-            [primaryCoords.lon, primaryCoords.lat],
-            [result.lon, result.lat]
-          ]
-        }
-      }]
+      'type': 'Feature',
+      'geometry': {
+        'type': 'LineString',
+        'coordinates': [
+          [primaryCoords.lon, primaryCoords.lat],
+          [result.lon, result.lat]
+        ]
+      }
     };
 
-    // Add the line to the map
     if (!map.getSource('comparison-lines')) {
       map.addSource('comparison-lines', {
         'type': 'geojson',
-        'data': geojson
+        'data': {
+          'type': 'FeatureCollection',
+          'features': [geojson]
+        }
       });
       map.addLayer({
         'id': 'comparison-lines',
@@ -266,20 +259,11 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
     } else {
       // If the source already exists, append the new line
       const existingData = map.getSource('comparison-lines')._data;
-      existingData.features.push({
-        'type': 'Feature',
-        'geometry': {
-          'type': 'LineString',
-          'coordinates': [
-            [primaryCoords.lon, primaryCoords.lat],
-            [result.lon, result.lat]
-          ]
-        }
-      });
+      existingData.features.push(geojson);
       map.getSource('comparison-lines').setData(existingData);
     }
 
-    comparisonLayers.push(line); // Not used in Mapbox GL JS; lines are managed via GeoJSON
+    // Note: comparisonLayers are not used in this Mapbox implementation since lines are managed via GeoJSON
 
     // Calculate distance
     const distance = calculateDistance(primaryCoords, { lat: result.lat, lon: result.lon });
@@ -292,19 +276,20 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
       const index = comparisonMarkers.indexOf(marker);
       if (index > -1) {
         comparisonMarkers.splice(index, 1);
-        comparisonLayers.splice(index, 1);
-      }
-
-      // Remove corresponding line from GeoJSON
-      const source = map.getSource('comparison-lines');
-      if (source) {
-        const data = source._data;
-        data.features.splice(index, 1);
-        source.setData(data);
+        // Remove corresponding line from GeoJSON
+        const source = map.getSource('comparison-lines');
+        if (source) {
+          const data = source._data;
+          data.features.splice(index, 1);
+          source.setData(data);
+        }
       }
 
       // Remove list item
       document.getElementById('comparison-list').removeChild(li);
+
+      // Sort the comparison list after removal
+      sortComparisons();
     });
 
     // Sort the comparison list after adding a new location
@@ -329,15 +314,17 @@ function updateDistances() {
       distanceSpan.textContent = `Distance: ${distance} km`;
     }
 
-    // Update line in GeoJSON
+    // Update corresponding line in GeoJSON
     const source = map.getSource('comparison-lines');
     if (source) {
       const data = source._data;
-      data.features[index].geometry.coordinates = [
-        [primaryCoords.lon, primaryCoords.lat],
-        [coords.lng, coords.lat]
-      ];
-      source.setData(data);
+      if (data.features[index]) {
+        data.features[index].geometry.coordinates = [
+          [primaryCoords.lon, primaryCoords.lat],
+          [coords.lng, coords.lat]
+        ];
+        source.setData(data);
+      }
     }
   });
 }
