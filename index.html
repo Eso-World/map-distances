@@ -1,63 +1,71 @@
-// Function to copy text to clipboard with fallback
-function copyToClipboard(text, button) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    // Use navigator.clipboard API if available
-    navigator.clipboard.writeText(text).then(() => {
-      showCopyFeedback();
-      highlightButton(button);
-    }).catch(err => {
-      console.error('Could not copy text: ', err);
-      fallbackCopyTextToClipboard(text, button);
-    });
-  } else {
-    // Fallback method
-    fallbackCopyTextToClipboard(text, button);
-  }
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Map Distance Calculator</title>
+  
+  <!-- Leaflet CSS from UNPKG without integrity and crossorigin -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  
+  <!-- External CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
 
-// Fallback method for copying text
-function fallbackCopyTextToClipboard(text, button) {
-  const textArea = document.createElement('textarea');
-  textArea.value = text;
-  
-  // Avoid scrolling to bottom
-  textArea.style.top = '0';
-  textArea.style.left = '0';
-  textArea.style.position = 'fixed';
-  
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-  
-  try {
-    const successful = document.execCommand('copy');
-    if (successful) {
-      showCopyFeedback();
-      highlightButton(button);
-    } else {
-      console.error('Fallback: Oops, unable to copy');
-    }
-  } catch (err) {
-    console.error('Fallback: Could not copy text', err);
-  }
-  
-  document.body.removeChild(textArea);
-}
+  <header>
+    <h1>Map Distance Calculator</h1>
+  </header>
 
-// Function to highlight the copied button
-function highlightButton(button) {
-  button.classList.add('copied');
-  setTimeout(() => {
-    button.classList.remove('copied');
-  }, 1000); // Highlight for 1 second
-}
+  <!-- Sidebar for Quick Addresses -->
+  <div id="sidebar">
+    <h3>Quick Addresses</h3>
+    <div class="button-group">
+      <button class="address-button" data-address="Zur Luftbrücke 1, 31515 Wunstorf, Germany">1</button>
+      <button class="address-button" data-address="10, Sedanstraße, Weststadt, Ulm, Baden-Württemberg, 89077, Germany">2</button>
+      <button class="address-button" data-address="Claude-Dornier-Straße, 88090 Immenstaad am Bodensee, Germany">3</button>
+      <button class="address-button" data-address="Willy-Messerschmitt-Straße 1, 82024 Taufkirchen, Germany">4</button>
+      <button class="address-button" data-address="Gunnels Wood Rd, Stevenage SG1 2AS">5</button>
+      <button class="address-button" data-address="Av. Maestranza Aérea, 41011 Sevilla, Spain">6</button>
+      <button class="address-button" data-address="Anchorage Road, Portsmouth PO3 5PU">7</button>
+      <button class="address-button" data-address="Rechliner Str., 85077 Manching, Germany">8</button>
+      <button class="address-button" data-address="Quadrant House, Celtic Springs Business Park, Duffryn, Newport NP10 8FZ">9</button>
+      <button class="address-button" data-address="Partnership House, Regent Farm Rd, Newcastle upon Tyne NE3 3AF">10</button>
+      <button class="address-button" data-address="ZA Clef de Saint Pierre, 1 Bd Jean Moulin, 78990 Élancourt, France">11</button>
+    </div>
+    <div id="copy-feedback" class="hidden">Address Copied!</div>
+  </div>
 
-// Update the event listener to pass the button element
-addressButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const address = button.getAttribute('data-address');
-    if (address) {
-      copyToClipboard(address, button);
-    }
-  });
-});
+  <main>
+    <div id="controls">
+      <div class="location-input">
+        <label for="primary-location">Primary Location:</label>
+        <input type="text" id="primary-location" placeholder="Enter primary location" autocomplete="off">
+        <div class="suggestions" id="primary-suggestions"></div>
+        <button id="set-primary">Set Primary Location</button>
+      </div>
+
+      <div class="location-input" id="comparison-locations-section">
+        <h3>Comparison Locations:</h3>
+        <input type="text" id="comparison-input" placeholder="Enter comparison location" autocomplete="off">
+        <div class="suggestions" id="comparison-suggestions"></div>
+        <button id="add-comparison">Add Location</button>
+        <ul id="comparison-list"></ul>
+      </div>
+    </div>
+
+    <div id="map"></div>
+  </main>
+
+  <!-- Leaflet JS from UNPKG without integrity and crossorigin -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  ></script>
+  
+  <!-- External JS -->
+  <script src="script.js"></script>
+</body>
+</html>
