@@ -330,3 +330,38 @@ document.getElementById('comparison-input').addEventListener('keydown', function
     document.getElementById('add-comparison').click();
   }
 });
+
+/* ======= New Code for Copying Addresses ======= */
+
+// Select all address buttons
+const addressButtons = document.querySelectorAll('.address-button');
+const copyFeedback = document.getElementById('copy-feedback');
+
+// Function to copy text to clipboard
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showCopyFeedback();
+  }).catch(err => {
+    console.error('Could not copy text: ', err);
+  });
+}
+
+// Function to show copy feedback
+function showCopyFeedback() {
+  copyFeedback.classList.remove('hidden');
+  copyFeedback.classList.add('visible');
+  setTimeout(() => {
+    copyFeedback.classList.remove('visible');
+    copyFeedback.classList.add('hidden');
+  }, 2000); // Feedback visible for 2 seconds
+}
+
+// Add click event listeners to address buttons
+addressButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const address = button.getAttribute('data-address');
+    if (address) {
+      copyToClipboard(address);
+    }
+  });
+});
