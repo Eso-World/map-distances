@@ -1,184 +1,94 @@
-/* Reset some basic styles */
-* {
-  box-sizing: border-box;
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f9f9f9;
-  color: #333;
-}
-
-/* Header Styling */
 header {
   background-color: #4CAF50;
   color: white;
-  padding: 20px 0;
+  padding: 15px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-header h1 {
-  font-size: 2em;
-}
-
-/* Container Layout */
-.container {
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - 80px); /* Adjust based on header height */
-}
-
-/* Main Content */
-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Controls Section */
 #controls {
   padding: 20px;
-  background-color: #fff;
+  background-color: #f4f4f4;
   display: flex;
   flex-direction: column;
-  gap: 30px;
-  max-width: 800px;
-  margin: 20px auto 0 auto;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  gap: 20px;
 }
 
 .location-input {
   position: relative;
-}
-
-.location-input label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
-}
-
-.location-input input[type="text"],
-.location-input select {
   width: 100%;
-  padding: 10px 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1em;
-  transition: border-color 0.3s ease;
+  max-width: 500px;
 }
 
-.location-input input[type="text"]:focus,
-.location-input select:focus {
-  border-color: #4CAF50;
-  outline: none;
+.location-input input[type="text"] {
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-button {
-  margin-top: 10px;
-  padding: 10px 15px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1em;
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-/* Suggestions Dropdown */
 .suggestions {
   position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
   background: white;
   border: 1px solid #ccc;
   border-top: none;
-  max-height: 200px;
+  max-height: 150px;
   overflow-y: auto;
+  width: 100%;
   z-index: 1000;
-  border-radius: 0 0 4px 4px;
 }
 
 .suggestion-item {
-  padding: 10px 15px;
+  padding: 8px;
   cursor: pointer;
-  border-bottom: 1px solid #eee;
-}
-
-.suggestion-item:last-child {
-  border-bottom: none;
 }
 
 .suggestion-item:hover {
   background-color: #f0f0f0;
 }
 
-/* Comparison List */
-#comparison-list {
-  margin-top: 20px;
-  max-height: 300px;
-  overflow-y: auto;
+#controls button {
+  padding: 8px 12px;
+  margin-top: 10px;
+  cursor: pointer;
 }
 
-#comparison-list li {
-  padding: 10px 15px;
-  background-color: #fafafa;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 10px;
+#comparison-locations {
+  margin-top: 20px;
+}
+
+#comparison-locations ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#comparison-locations li {
+  padding: 5px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-#comparison-list li span {
-  font-size: 0.9em;
-  color: #555;
-}
-
-#comparison-list button {
+#comparison-locations button {
   background-color: #f44336;
   color: white;
   border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
+  padding: 5px 10px;
   cursor: pointer;
-  font-size: 0.9em;
-  transition: background-color 0.3s ease;
 }
 
-#comparison-list button:hover {
-  background-color: #d32f2f;
-}
-
-/* Map Styling */
 #map {
-  flex: 1;
-  margin: 20px auto;
-  max-width: 1200px;
-  height: 600px;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  height: 500px;
+  width: 100%;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  #controls {
-    max-width: 90%;
-  }
-  
-  #map {
-    max-width: 90%;
-    height: 400px;
-  }
+footer {
+  text-align: center;
+  padding: 10px;
+  background-color: #ddd;
 }
