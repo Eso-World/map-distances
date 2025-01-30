@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Map Distance Calculator</title>
   
-  <!-- Mapbox GL JS CSS -->
-  <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-sA+e2o4IH1lEewLjVMNZYRttJtb/3qOzPI+EUPe3uE8="
+    crossorigin=""
+  />
   
   <!-- External CSS -->
   <link rel="stylesheet" href="styles.css">
@@ -17,47 +22,35 @@
     <h1>Map Distance Calculator</h1>
   </header>
 
-  <div class="container">
-    <!-- Main Content -->
-    <main>
-      <div id="controls">
-        <!-- Presets Dropdown -->
-        <div class="location-input">
-          <label for="presets-dropdown">Select a Preset Primary Location:</label>
-          <select id="presets-dropdown">
-            <option value="" disabled selected>Select a preset</option>
-            <option value="Zur Luftbrücke 1, 31515 Wunstorf, Germany">1. Zur Luftbrücke 1, 31515 Wunstorf, Germany</option>
-            <option value="10, Sedanstraße, Weststadt, Ulm, Baden-Württemberg, 89077, Germany">2. 10, Sedanstraße, Weststadt, Ulm, Baden-Württemberg, 89077, Germany</option>
-            <option value="Claude-Dornier-Straße, 88090 Immenstaad am Bodensee, Germany">3. Claude-Dornier-Straße, 88090 Immenstaad am Bodensee, Germany</option>
-            <option value="Willy-Messerschmitt-Straße 1, 82024 Taufkirchen, Germany">4. Willy-Messerschmitt-Straße 1, 82024 Taufkirchen, Germany</option>
-            <option value="Gunnels Wood Rd, Stevenage SG1 2AS">5. Gunnels Wood Rd, Stevenage SG1 2AS</option>
-            <option value="Av. Maestranza Aérea, 41011 Sevilla, Spain">6. Av. Maestranza Aérea, 41011 Sevilla, Spain</option>
-            <option value="Anchorage Road, Portsmouth PO3 5PU">7. Anchorage Road, Portsmouth PO3 5PU</option>
-            <option value="Rechliner Str., 85077 Manching, Germany">8. Rechliner Str., 85077 Manching, Germany</option>
-            <option value="Quadrant House, Celtic Springs Business Park, Duffryn, Newport NP10 8FZ">9. Quadrant House, Celtic Springs Business Park, Duffryn, Newport NP10 8FZ</option>
-            <option value="Partnership House, Regent Farm Rd, Newcastle upon Tyne NE3 3AF">10. Partnership House, Regent Farm Rd, Newcastle upon Tyne NE3 3AF</option>
-            <option value="ZA Clef de Saint Pierre, 1 Bd Jean Moulin, 78990 Élancourt, France">11. ZA Clef de Saint Pierre, 1 Bd Jean Moulin, 78990 Élancourt, France</option>
-          </select>
-          <button id="set-preset">Set Preset Location</button>
-        </div>
+  <div id="controls">
+    <div class="location-input">
+      <label for="primary-location">Primary Location:</label><br>
+      <input type="text" id="primary-location" placeholder="Enter primary location" autocomplete="off">
+      <div class="suggestions" id="primary-suggestions"></div>
+      <button id="set-primary">Set Primary Location</button>
+    </div>
 
-        <!-- Comparison Locations Input -->
-        <div class="location-input" id="comparison-locations-section">
-          <h3>Comparison Locations:</h3>
-          <input type="text" id="comparison-input" placeholder="Enter comparison location" autocomplete="off">
-          <div class="suggestions" id="comparison-suggestions"></div>
-          <button id="add-comparison">Add Location</button>
-          <ul id="comparison-list"></ul>
-        </div>
-      </div>
-
-      <!-- Map Display -->
-      <div id="map"></div>
-    </main>
+    <div class="location-input" id="comparison-locations-section">
+      <h3>Comparison Locations:</h3>
+      <input type="text" id="comparison-input" placeholder="Enter comparison location" autocomplete="off">
+      <div class="suggestions" id="comparison-suggestions"></div>
+      <button id="add-comparison">Add Location</button>
+      <ul id="comparison-list"></ul>
+    </div>
   </div>
 
-  <!-- Mapbox GL JS -->
-  <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+  <div id="map"></div>
+
+  <footer>
+    &copy; 2025 Map Distance Calculator
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-o9N1j0gQyMkL9QbsGShqm4U3LkP3fAtN1tCkpeKZJv0="
+    crossorigin=""
+  ></script>
   
   <!-- External JS -->
   <script src="script.js"></script>
