@@ -1,5 +1,5 @@
 // Replace with your actual Mapbox access token
-mapboxgl.accessToken = 'pk.eyJ1Ijoic2VyZ2lvMzciLCJhIjoiY20yam5lN3V4MDg0czJqcjBzYm90ZWFpeSJ9.axoO1GoQ5weLtjCxXq4ABw;
+mapboxgl.accessToken = 'pk.eyJ1Ijoic2VyZ2lvMzciLCJhIjoiY20yam5lN3V4MDg0czJqcjBzYm90ZWFpeSJ9.axoO1GoQ5weLtjCxXq4ABw';
 
 // Initialize the Mapbox map
 const map = new mapboxgl.Map({
@@ -13,7 +13,7 @@ const map = new mapboxgl.Map({
 let primaryMarker = null;
 let primaryCoords = null;
 const comparisonMarkers = [];
-const comparisonLayers = [];
+const comparisonLines = [];
 
 // Debounce function to limit the rate of API calls
 function debounce(func, delay) {
@@ -115,12 +115,13 @@ function calculateDistance(coord1, coord2) {
 
 // Function to sort comparison locations by distance
 function sortComparisons() {
-  // Create an array of objects containing marker, layer, list item, and distance
+  // Create an array of objects containing marker, line, list item, and distance
   const comparisons = comparisonMarkers.map((marker, index) => {
     const coords = marker.getLngLat();
     const distance = parseFloat(calculateDistance(primaryCoords, { lat: coords.lat, lon: coords.lng }));
     const listItem = document.querySelectorAll('#comparison-list li')[index];
-    return { marker, layer: comparisonLayers[index], listItem, distance };
+    const line = comparisonLines[index];
+    return { marker, line, listItem, distance };
   });
 
   // Sort the array based on distance
@@ -263,7 +264,7 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
       map.getSource('comparison-lines').setData(existingData);
     }
 
-    // Note: comparisonLayers are not used in this Mapbox implementation since lines are managed via GeoJSON
+    comparisonLines.push(geojson); // Store the GeoJSON for potential future use
 
     // Calculate distance
     const distance = calculateDistance(primaryCoords, { lat: result.lat, lon: result.lon });
@@ -282,6 +283,7 @@ document.getElementById('add-comparison').addEventListener('click', async () => 
           const data = source._data;
           data.features.splice(index, 1);
           source.setData(data);
+          comparisonLines.splice(index, 1);
         }
       }
 
